@@ -10,7 +10,7 @@
 
 [build.environment]
   # Node.js version (must match .nvmrc)
-  NODE_VERSION = "20.11.0"
+  NODE_VERSION = "20.19.0"
 
   # IMPORTANT: Must be set to NOT skip devDependencies during install
   NPM_FLAGS = "--include=dev"
