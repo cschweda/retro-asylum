@@ -11,6 +11,9 @@ export default defineNuxtConfig({
       routes: ["/", "/sitemap.xml", "/robots.txt"],
       ignore: ["/admin"],
     },
+    output: {
+      publicDir: ".output/public",
+    },
   },
 
   modules: [
