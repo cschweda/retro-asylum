@@ -5,23 +5,26 @@
 This project is configured for deployment on Netlify with the following settings:
 
 ### Build Command
+
 ```bash
 yarn install && yarn build
 ```
 
 ### Publish Directory
+
 ```
 .output/public
 ```
 
 ### Node Version
+
 ```
 20.11.0
 ```
 
 ### Environment Variables
+
 - `NODE_VERSION`: 20.11.0
-- `NODE_ENV`: production
 - `NITRO_PRERENDER`: false
 
 ## Netlify.toml
@@ -36,7 +39,6 @@ The `netlify.toml` file contains all deployment configuration:
 
 [build.environment]
   NODE_VERSION = "20.11.0"
-  NODE_ENV = "production"
   NITRO_PRERENDER = "false"
 
 [[redirects]]
@@ -48,6 +50,7 @@ The `netlify.toml` file contains all deployment configuration:
 ## Deployment Steps
 
 1. **Push to GitHub**
+
    ```bash
    git add .
    git commit -m "Deploy to Netlify"
@@ -55,6 +58,7 @@ The `netlify.toml` file contains all deployment configuration:
    ```
 
 2. **Connect to Netlify**
+
    - Go to https://app.netlify.com
    - Click "New site from Git"
    - Select your GitHub repository
@@ -98,4 +102,3 @@ The build includes sharp binaries for linux-x64. Ensure you're deploying to a co
 - **Node Version**: 20.11.0
 - **Build Tool**: Vite
 - **Runtime**: Node.js (Netlify Functions)
-

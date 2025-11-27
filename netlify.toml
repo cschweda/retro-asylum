@@ -15,9 +15,6 @@
   # Node.js version (must match .nvmrc)
   NODE_VERSION = "20.11.0"
 
-  # Production environment
-  NODE_ENV = "production"
-
   # Disable prerendering for this SPA
   NITRO_PRERENDER = "false"
 

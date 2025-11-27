@@ -1,23 +1,38 @@
 # Netlify Deployment Fix
 
 ## Problem
-Netlify deployment was failing with an incomplete build log. The error occurred after Node installation but before the actual build command ran.
+
+Netlify deployment was failing during the dependency installation phase with:
+
+```
+WARNING: The environment variable 'NODE_ENV' is set to 'production'.
+Any 'devDependencies' in package.json will not be installed
+Failed during stage 'Install dependencies': dependency_installation script returned non-zero exit code: 1
+```
 
 ## Root Cause
-The `netlify.toml` configuration was incomplete and didn't explicitly include dependency installation in the build command.
+
+The `netlify.toml` configuration had `NODE_ENV = "production"` which prevented Yarn from installing dev dependencies. However, Nuxt requires dev dependencies (like TypeScript, ESLint, etc.) to build successfully.
 
 ## Solution Applied
 
 ### 1. Updated `netlify.toml`
 
 **Before:**
+
 ```toml
 [build]
   command = "yarn build"
   publish = ".output/public"
+
+[build.environment]
+  NODE_VERSION = "20.11.0"
+  NODE_ENV = "production"
+  NITRO_PRERENDER = "false"
 ```
 
 **After:**
+
 ```toml
 [build]
   command = "yarn install && yarn build"
@@ -26,16 +41,16 @@ The `netlify.toml` configuration was incomplete and didn't explicitly include de
 
 [build.environment]
   NODE_VERSION = "20.11.0"
-  NODE_ENV = "production"
   NITRO_PRERENDER = "false"
 ```
 
 **Changes:**
-- Added explicit `yarn install` to build command
-- Added `functions` directory for Netlify Functions
-- Added explicit environment variables
-- Set `NODE_ENV` to production
-- Disabled prerendering (not needed for this SPA)
+
+- ✅ Added explicit `yarn install` to build command
+- ✅ Added `functions` directory for Netlify Functions
+- ✅ **REMOVED `NODE_ENV = "production"`** (this was blocking dev dependencies!)
+- ✅ Kept explicit Node version specification
+- ✅ Disabled prerendering (not needed for this SPA)
 
 ### 2. Updated `nuxt.config.ts`
 
@@ -54,6 +69,7 @@ nitro: {
 ### 3. Verified Files
 
 All required files are in place:
+
 - ✅ `.nvmrc` - Node version 20.11.0
 - ✅ `yarn.lock` - Dependency lock file
 - ✅ `package.json` - Dependencies and scripts
@@ -63,6 +79,7 @@ All required files are in place:
 ## Deployment Command
 
 The exact command Netlify will run:
+
 ```bash
 yarn install && yarn build
 ```
@@ -77,6 +94,7 @@ yarn install && yarn build
 ## Testing
 
 Build tested locally and confirmed working:
+
 ```bash
 yarn build
 # ✔ Client built in 1087ms
@@ -96,8 +114,8 @@ yarn build
 ## Troubleshooting
 
 If deployment still fails:
+
 1. Check the full Netlify build log (not just the excerpt)
 2. Look for errors after "Running build command"
 3. Verify all files are committed (especially `yarn.lock`)
 4. Run `yarn build` locally to reproduce any errors
-
