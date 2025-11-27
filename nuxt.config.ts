@@ -3,13 +3,13 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
 
+  // SSR enabled for prerendering, but generates static site
   ssr: true,
 
   nitro: {
     prerender: {
-      crawlLinks: false,
-      routes: ["/", "/sitemap.xml", "/robots.txt"],
-      ignore: ["/admin"],
+      crawlLinks: true, // Crawl all links for static generation
+      routes: ["/"],
     },
     output: {
       publicDir: ".output/public",

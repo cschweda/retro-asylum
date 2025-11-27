@@ -1,24 +1,304 @@
 {
-  "width": 16,
-  "height": 16,
+  "width": 12,
+  "height": 12,
   "start_facing": "E",
   "map": [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, "S", 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1],
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-    [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-    [1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, "E", 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-  ]
+    [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    [
+      1,
+      "S",
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1
+    ],
+    [
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      "E",
+      1
+    ],
+    [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  ],
+  "items": [
+    {
+      "id": "key-1-2-1",
+      "type": "key",
+      "name": "brass key",
+      "x": 1,
+      "y": 2,
+      "properties": {
+        "description": "A tarnished brass key. It looks old but sturdy.",
+        "aliases": [
+          "key",
+          "brass key",
+          "keys"
+        ]
+      }
+    },
+    {
+      "id": "chest-4-3-1",
+      "type": "chest",
+      "name": "locked chest",
+      "x": 4,
+      "y": 3,
+      "properties": {
+        "locked": true,
+        "keyId": "key-1-2-1",
+        "open": false,
+        "description": "A heavy wooden chest with an iron lock.",
+        "aliases": [
+          "chest",
+          "box",
+          "trunk"
+        ]
+      }
+    },
+    {
+      "id": "door-6-5-1",
+      "type": "door",
+      "name": "wooden door",
+      "x": 6,
+      "y": 5,
+      "properties": {
+        "locked": false,
+        "open": false,
+        "description": "A solid wooden door.",
+        "aliases": [
+          "door",
+          "gate"
+        ]
+      }
+    },
+    {
+      "id": "bed-8-6-1",
+      "type": "bed",
+      "name": "bed",
+      "x": 8,
+      "y": 6,
+      "properties": {
+        "healthRestore": 50,
+        "description": "A simple bed. It looks comfortable.",
+        "aliases": [
+          "bed",
+          "cot"
+        ]
+      }
+    },
+    {
+      "id": "food-3-4-1",
+      "type": "food",
+      "name": "bread",
+      "x": 3,
+      "y": 4,
+      "properties": {
+        "healthRestore": 25,
+        "description": "A loaf of fresh bread.",
+        "aliases": [
+          "food",
+          "bread",
+          "rations"
+        ]
+      }
+    },
+    {
+      "id": "weapon-9-7-1",
+      "type": "weapon",
+      "name": "sword",
+      "x": 9,
+      "y": 7,
+      "properties": {
+        "damage": 10,
+        "description": "A sharp steel sword.",
+        "aliases": [
+          "weapon",
+          "sword",
+          "blade"
+        ]
+      }
+    },
+    {
+      "id": "trap-5-8-1",
+      "type": "trap",
+      "name": "trap",
+      "x": 5,
+      "y": 8,
+      "properties": {
+        "damage": 20,
+        "description": "A dangerous trap!",
+        "aliases": [
+          "trap",
+          "pit"
+        ]
+      }
+    },
+    {
+      "id": "switch-2-9-1",
+      "type": "switch",
+      "name": "switch",
+      "x": 2,
+      "y": 9,
+      "properties": {
+        "description": "A mysterious switch on the wall.",
+        "aliases": [
+          "switch",
+          "button",
+          "lever"
+        ]
+      }
+    }
+  ],
+  "name": "Sample Map"
 }
-

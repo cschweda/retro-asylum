@@ -1,14 +1,15 @@
 import { ref, onMounted, onUnmounted } from 'vue'
+import type { LevelData } from '../utils/mapUtils'
+import type { MapItem } from '../types/items'
+import { getItemsOnTile, renderItemSprite, renderItemLabel, calculateItemScreenPosition } from '../utils/itemRenderer'
+import type { Verb, CommandResponse } from './useTextParser'
 
-interface LevelData {
-  width: number
-  height: number
-  start_facing: string
-  map: (number | string)[][]
-}
-
-export const useGame = (canvasRef: any) => {
-  const levelData = ref<LevelData | null>(null)
+export const useGame = (
+  canvasRef: any,
+  initialMap?: LevelData | null,
+  executeItemCommand?: (verb: Verb, object: string | null, items: MapItem[]) => Promise<CommandResponse>
+) => {
+  const levelData = ref<LevelData | null>(initialMap || null)
   const gameRunning = ref(false)
 
   // Game State
@@ -27,12 +28,16 @@ export const useGame = (canvasRef: any) => {
     ArrowDown: false,
     ArrowLeft: false,
     ArrowRight: false,
-    Space: false,
   }
 
   const loadMap = async () => {
-    const response = await fetch('/maps/level1.json')
-    levelData.value = await response.json()
+    if (!initialMap) {
+      const response = await fetch('/maps/level1.json')
+      const data = await response.json()
+      levelData.value = data
+    } else {
+      levelData.value = initialMap
+    }
   }
 
   const setDirection = (cardinal: string) => {
@@ -47,6 +52,11 @@ export const useGame = (canvasRef: any) => {
 
     planeX = -dirY * 0.66
     planeY = dirX * 0.66
+  }
+
+  const switchMap = (newMap: LevelData) => {
+    levelData.value = newMap
+    initGame()
   }
 
   const initGame = () => {
@@ -65,6 +75,13 @@ export const useGame = (canvasRef: any) => {
     render()
   }
 
+  const getCurrentTileItems = (): MapItem[] => {
+    if (!levelData.value || !levelData.value.items) return []
+    const tileX = Math.floor(posX)
+    const tileY = Math.floor(posY)
+    return getItemsOnTile(levelData.value.items, tileX, tileY)
+  }
+
   const render = () => {
     if (!canvasRef.value || !levelData.value) return
 
@@ -73,9 +90,12 @@ export const useGame = (canvasRef: any) => {
     const SCREEN_W = canvas.width
     const SCREEN_H = canvas.height
 
-    ctx.fillStyle = '#FFFFFF'
+    // TRS-80 style background - simple light background like the original games
+    // The original games had a simple, uniform background
+    ctx.fillStyle = '#E0E0E0'
     ctx.fillRect(0, 0, SCREEN_W, SCREEN_H)
 
+    // Raycasting for walls
     for (let x = 0; x < SCREEN_W; x++) {
       let cameraX = (2 * x) / SCREEN_W - 1
       let rayDirX = dirX + planeX * cameraX
@@ -142,15 +162,90 @@ export const useGame = (canvasRef: any) => {
       if (drawStart < 0) drawStart = 0
       if (drawEnd >= SCREEN_H) drawEnd = SCREEN_H - 1
 
-      ctx.fillStyle = '#000000'
-      if (side === 1) ctx.fillStyle = '#222222'
-
-      ctx.fillRect(x, drawStart, 1, drawEnd - drawStart)
+      // TRS-80 style wall rendering with authentic blocky texture
+      const wallHeight = drawEnd - drawStart
+      
+      // Base colors - authentic TRS-80 palette
+      // Side 0 = east/west walls (darker), Side 1 = north/south walls (lighter)
+      // TRS-80 used darker, more muted colors
+      const darkWall = side === 0 ? '#0f0f0f' : '#1f1f1f'
+      const lightWall = side === 0 ? '#2a2a2a' : '#3a3a3a'
+      
+      // Distance-based shading for depth perception
+      const brightness = Math.max(0.4, Math.min(1.0, 1.0 - perpWallDist * 0.12))
+      
+      // Calculate base wall color with distance shading
+      const darkR = Math.floor(parseInt(darkWall.slice(1, 3), 16) * brightness)
+      const darkG = Math.floor(parseInt(darkWall.slice(3, 5), 16) * brightness)
+      const darkB = Math.floor(parseInt(darkWall.slice(5, 7), 16) * brightness)
+      
+      const lightR = Math.floor(parseInt(lightWall.slice(1, 3), 16) * brightness)
+      const lightG = Math.floor(parseInt(lightWall.slice(3, 5), 16) * brightness)
+      const lightB = Math.floor(parseInt(lightWall.slice(5, 7), 16) * brightness)
+      
+      // Draw TRS-80 style blocky texture pattern
+      // Pattern repeats every 4 pixels for that authentic retro look
+      const patternOffset = Math.floor(drawStart / 2) % 4
+      
+      for (let py = Math.floor(drawStart); py < Math.ceil(drawEnd); py++) {
+        const patternY = (py + patternOffset) % 4
+        const patternX = x % 2
+        
+        // Create a simple crosshatch/block pattern
+        if ((patternX + patternY) % 2 === 0) {
+          ctx.fillStyle = `rgb(${lightR},${lightG},${lightB})`
+        } else {
+          ctx.fillStyle = `rgb(${darkR},${darkG},${darkB})`
+        }
+        
+        ctx.fillRect(x, py, 1, 1)
+      }
     }
 
+    // Render items
+    if (levelData.value.items) {
+      const currentTileX = Math.floor(posX)
+      const currentTileY = Math.floor(posY)
+      
+      for (const item of levelData.value.items) {
+        const itemTileX = Math.floor(item.x)
+        const itemTileY = Math.floor(item.y)
+        
+        // Calculate distance in tiles
+        const tileDistance = Math.max(Math.abs(itemTileX - currentTileX), Math.abs(itemTileY - currentTileY))
+        
+        // Only render items on visible tiles (same tile or adjacent)
+        if (tileDistance <= 1) {
+          const screenPos = calculateItemScreenPosition(
+            item.x,
+            item.y,
+            posX,
+            posY,
+            dirX,
+            dirY,
+            planeX,
+            planeY,
+            SCREEN_W,
+            SCREEN_H
+          )
+
+          if (screenPos && screenPos.distance < 5) {
+            // Render items on current tile normally, adjacent tiles smaller/faded
+            const isOnCurrentTile = tileDistance === 0
+            renderItemSprite(ctx, item, screenPos.x, screenPos.y, screenPos.distance, isOnCurrentTile)
+            if (isOnCurrentTile) {
+              // Only show labels for items on current tile (interactable)
+              renderItemLabel(ctx, item, screenPos.x, screenPos.y, screenPos.distance)
+            }
+          }
+        }
+      }
+    }
+
+    // Exit message
     let mx = Math.floor(posX)
     let my = Math.floor(posY)
-    if (levelData.value.map[my][mx] === 'E') {
+    if (levelData.value.map[my] && levelData.value.map[my][mx] === 'E') {
       ctx.fillStyle = 'black'
       ctx.font = '20px monospace'
       ctx.fillText('EXIT FOUND', 40, 50)
@@ -194,17 +289,17 @@ export const useGame = (canvasRef: any) => {
       moved = true
     }
 
-    if (keys.ArrowUp || keys.Space) {
+    if (keys.ArrowUp) {
       let newX = posX + dirX * moveSpeed
       let newY = posY + dirY * moveSpeed
 
       let gridX = Math.floor(newX)
       let gridY = Math.floor(posY)
-      if (levelData.value?.map[gridY][gridX] !== 1) posX = newX
+      if (levelData.value?.map[gridY] && levelData.value.map[gridY][gridX] !== 1) posX = newX
 
       gridX = Math.floor(posX)
       gridY = Math.floor(newY)
-      if (levelData.value?.map[gridY][gridX] !== 1) posY = newY
+      if (levelData.value?.map[gridY] && levelData.value.map[gridY][gridX] !== 1) posY = newY
 
       moved = true
     }
@@ -215,11 +310,11 @@ export const useGame = (canvasRef: any) => {
 
       let gridX = Math.floor(newX)
       let gridY = Math.floor(posY)
-      if (levelData.value?.map[gridY][gridX] !== 1) posX = newX
+      if (levelData.value?.map[gridY] && levelData.value.map[gridY][gridX] !== 1) posX = newX
 
       gridX = Math.floor(posX)
       gridY = Math.floor(newY)
-      if (levelData.value?.map[gridY][gridX] !== 1) posY = newY
+      if (levelData.value?.map[gridY] && levelData.value.map[gridY][gridX] !== 1) posY = newY
 
       moved = true
     }
@@ -246,6 +341,8 @@ export const useGame = (canvasRef: any) => {
 
   return {
     levelData,
+    switchMap,
+    getCurrentTileItems,
+    getPlayerPosition: () => ({ x: posX, y: posY }),
   }
 }
-

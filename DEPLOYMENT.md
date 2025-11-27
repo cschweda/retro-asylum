@@ -2,13 +2,15 @@
 
 ## Netlify Configuration
 
-This project is configured for deployment on Netlify with the following settings:
+This project is configured for **static site deployment** on Netlify. No serverless functions or database are required - everything runs client-side.
 
 ### Build Command
 
 ```bash
-yarn install && yarn build
+yarn generate
 ```
+
+This runs `nuxt generate` which prerenders the app as a static site.
 
 ### Publish Directory
 
@@ -19,13 +21,8 @@ yarn install && yarn build
 ### Node Version
 
 ```
-20.11.0
+22
 ```
-
-### Environment Variables
-
-- `NODE_VERSION`: 20.11.0
-- `NITRO_PRERENDER`: false
 
 ## Netlify.toml
 
@@ -33,18 +30,11 @@ The `netlify.toml` file contains all deployment configuration:
 
 ```toml
 [build]
-  command = "yarn install && yarn build"
+  command = "yarn generate"
   publish = ".output/public"
-  functions = ".output/server"
 
 [build.environment]
-  NODE_VERSION = "20.11.0"
-  NITRO_PRERENDER = "false"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+  NODE_VERSION = "22"
 ```
 
 ## Deployment Steps
@@ -75,30 +65,39 @@ The `netlify.toml` file contains all deployment configuration:
 Test the production build locally:
 
 ```bash
-yarn build
+yarn generate
 yarn preview
 ```
 
 Then visit `http://localhost:3000` to verify the build works.
+
+## Static Site Features
+
+This app is fully static and client-side:
+- ✅ **No serverless functions needed** - All logic runs in the browser
+- ✅ **No database needed** - User maps stored in localStorage
+- ✅ **Built-in maps** - Served from `/public/maps/` directory
+- ✅ **Fully static** - Can be deployed to any static hosting
 
 ## Troubleshooting
 
 ### Build Fails on Netlify
 
 1. Check the full build log in Netlify dashboard
-2. Verify `.nvmrc` is committed (Node version)
-3. Verify `yarn.lock` is committed (dependencies)
-4. Run `yarn build` locally to reproduce the error
-5. Check that all required files are committed to git
+2. Verify `yarn.lock` is committed (dependencies)
+3. Run `yarn generate` locally to reproduce the error
+4. Check that all required files are committed to git
 
-### Sharp Binary Issues
+### localStorage Not Working
 
-The build includes sharp binaries for linux-x64. Ensure you're deploying to a compatible architecture.
+- localStorage only works in the browser (not during SSR)
+- The app handles this automatically with browser checks
+- User maps will only be available after the page loads in the browser
 
 ## Environment
 
 - **Framework**: Nuxt 4
-- **Package Manager**: Yarn 1.22.22
-- **Node Version**: 20.11.0
+- **Package Manager**: Yarn
+- **Node Version**: 22
 - **Build Tool**: Vite
-- **Runtime**: Node.js (Netlify Functions)
+- **Deployment**: Static Site (no server required)
